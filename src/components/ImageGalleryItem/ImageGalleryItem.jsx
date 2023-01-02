@@ -8,7 +8,6 @@ export class ImageGalleryItem extends Component {
     alt: '',
   };
   toggleVisibleModal = (imageModal, alt) => {
-    console.log(imageModal);
     this.setState(prevState => ({
       modal: !prevState.modal,
       imageModal,

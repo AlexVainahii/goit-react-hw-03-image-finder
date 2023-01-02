@@ -11,6 +11,7 @@ export class App extends Component {
     isLoading: false,
     loadMoreVisible: false,
     error: null,
+    page: 1,
   };
 
   searchImages = async searchq => {
@@ -20,7 +21,6 @@ export class App extends Component {
       const { hits, totalHits } = (await myGallery.getPhotos()).data;
       const images = hits;
       myGallery.maxPages = Math.ceil(totalHits / 12);
-      console.log(images);
       this.setState({
         images: images,
         loadMoreVisible: myGallery.ShowLoadMore(),
@@ -34,18 +34,15 @@ export class App extends Component {
       this.setState({ isLoading: false });
     }
   };
-  loadMore = async () => {
+
+  getData = async () => {
     try {
       this.setState({ isLoading: true, erorr: null });
-      myGallery.incPage();
       const images = (await myGallery.getPhotos()).data.hits;
-      console.log(images);
       this.setState(prevState => ({
         images: [...prevState.images, ...images],
       }));
-      this.setState({
-        loadMoreVisible: myGallery.ShowLoadMore(),
-      });
+
       return true;
     } catch {
       this.setState({ error: 'No pictures were found for this search' });
@@ -54,6 +51,19 @@ export class App extends Component {
       this.setState({ isLoading: false });
     }
   };
+
+  loadMore = () => {
+    this.setState({
+      page: myGallery.incPage(),
+      loadMoreVisible: myGallery.ShowLoadMore(),
+    });
+  };
+
+  componentDidUpdate(_, prevState) {
+    if (prevState.page !== this.state.page && this.state.page !== 1) {
+      this.getData();
+    }
+  }
 
   render() {
     const { searchImages, loadMore } = this;

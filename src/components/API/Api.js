@@ -37,13 +37,12 @@ export class PixabayApi {
   }
 
   incPage() {
-    this.#params.params.page += 1;
+    return (this.#params.params.page += 1);
   }
   resetPage() {
     this.#params.params.page = 1;
   }
   ShowLoadMore() {
-    console.log(this.#params.params.page, this.maxP);
     return this.#params.params.page < this.maxP;
   }
 }
