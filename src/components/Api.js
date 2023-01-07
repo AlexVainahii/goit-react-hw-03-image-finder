@@ -19,7 +19,6 @@ export class PixabayApi {
 
   async getPhotos() {
     const data = await axios.get('', this.#params);
-
     return data;
   }
   get search() {

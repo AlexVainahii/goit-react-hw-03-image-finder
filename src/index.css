@@ -160,7 +160,13 @@ code {
 /*
  * Стили компонента Modal
  */
-
+.dna-wrapper {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  justify-content: center;
+  align-items: center;
+}
 .Overlay {
   position: fixed;
   top: 0;

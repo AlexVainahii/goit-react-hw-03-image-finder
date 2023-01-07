@@ -10,6 +10,7 @@ export const Loader = ({ isLoading }) => {
         ariaLabel="dna-loading"
         wrapperStyle={{}}
         wrapperClass="dna-wrapper"
+        wrapperClassName="dna-wrapper"
       />
     </>
   );

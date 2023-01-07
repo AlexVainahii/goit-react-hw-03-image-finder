@@ -1,25 +1,41 @@
 import { Component } from 'react';
 import { Loader } from './Loader/Loader';
 import { Searchbar } from './Searchbar/Searchbar';
-import { PixabayApi } from './API/Api';
+import { PixabayApi } from './Api';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Button } from './Button/Button';
 const myGallery = new PixabayApi();
 export class App extends Component {
   state = {
+    searchWord: '',
     images: null,
     isLoading: false,
     loadMoreVisible: false,
     error: null,
     page: 1,
   };
-
-  searchImages = async searchq => {
+  searchImages = searchW => {
+    this.setState({ searchWord: searchW });
+  };
+  getData = async () => {
     try {
-      this.setState({ isLoading: true, erorr: null });
-      myGallery.search = searchq;
+      this.setState({
+        loadMoreVisible: false,
+        images: null,
+        isLoading: true,
+        erorr: null,
+      });
+      myGallery.search = this.state.searchWord;
       const { hits, totalHits } = (await myGallery.getPhotos()).data;
-      const images = hits;
+      const images = hits.map(image => {
+        const { id, webformatURL, largeImageURL, tags } = image;
+        return {
+          id,
+          webformatURL,
+          largeImageURL,
+          tags,
+        };
+      });
       myGallery.maxPages = Math.ceil(totalHits / 12);
       this.setState({
         images: images,
@@ -35,12 +51,21 @@ export class App extends Component {
     }
   };
 
-  getData = async () => {
+  pushData = async () => {
     try {
-      this.setState({ isLoading: true, erorr: null });
+      this.setState({ isLoading: true, erorr: null, loadMoreVisible: false });
       const images = (await myGallery.getPhotos()).data.hits;
+      const makeImages = images.map(image => {
+        const { id, webformatURL, largeImageURL, tags } = image;
+        return {
+          id,
+          webformatURL,
+          largeImageURL,
+          tags,
+        };
+      });
       this.setState(prevState => ({
-        images: [...prevState.images, ...images],
+        images: [...prevState.images, ...makeImages],
       }));
 
       return true;
@@ -61,7 +86,10 @@ export class App extends Component {
 
   componentDidUpdate(_, prevState) {
     if (prevState.page !== this.state.page && this.state.page !== 1) {
-      this.getData();
+      this.pushData();
+    }
+    if (prevState.searchWord !== this.state.searchWord) {
+      this.getData(this.searchWord);
     }
   }
 
@@ -71,9 +99,9 @@ export class App extends Component {
 
     return (
       <div>
-        <Loader isLoading={isLoading} />
         <Searchbar onSubmit={searchImages} />
-        <ImageGallery images={images} />
+        {images && <ImageGallery images={images} />}
+        <Loader isLoading={isLoading} />
         {loadMoreVisible && <Button onClick={loadMore} />}
       </div>
     );

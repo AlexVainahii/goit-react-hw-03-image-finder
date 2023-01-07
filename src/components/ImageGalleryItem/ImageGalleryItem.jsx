@@ -14,6 +14,11 @@ export class ImageGalleryItem extends Component {
       alt,
     }));
   };
+  static propTypes = {
+    webformatURL: PropTypes.string.isRequired,
+    largeImageURL: PropTypes.string.isRequired,
+    tags: PropTypes.string.isRequired,
+  };
   render() {
     const { webformatURL, largeImageURL, tags } = this.props;
     const { modal, imageModal, alt } = this.state;
@@ -41,9 +46,3 @@ export class ImageGalleryItem extends Component {
     );
   }
 }
-
-ImageGalleryItem.propTypes = {
-  webformatURL: PropTypes.string.isRequired,
-  largeImageURL: PropTypes.string.isRequired,
-  tags: PropTypes.string.isRequired,
-};
