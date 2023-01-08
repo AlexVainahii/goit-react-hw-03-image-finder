@@ -1,7 +1,7 @@
 import { Component } from 'react';
 import { Loader } from './Loader/Loader';
 import { Searchbar } from './Searchbar/Searchbar';
-import { PixabayApi } from './Api';
+import { PixabayApi } from '../Api';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Button } from './Button/Button';
 const myGallery = new PixabayApi();
@@ -17,15 +17,19 @@ export class App extends Component {
   searchImages = searchW => {
     this.setState({ searchWord: searchW });
   };
-  getData = async () => {
+  getData = async noPush => {
     try {
       this.setState({
         loadMoreVisible: false,
-        images: null,
         isLoading: true,
         erorr: null,
       });
-      myGallery.search = this.state.searchWord;
+      if (noPush) {
+        this.setState({
+          images: null,
+        });
+        myGallery.search = this.state.searchWord;
+      }
       const { hits, totalHits } = (await myGallery.getPhotos()).data;
       const images = hits.map(image => {
         const { id, webformatURL, largeImageURL, tags } = image;
@@ -36,38 +40,19 @@ export class App extends Component {
           tags,
         };
       });
-      myGallery.maxPages = Math.ceil(totalHits / 12);
+      if (noPush) {
+        myGallery.maxPages = Math.ceil(totalHits / 12);
+        this.setState({
+          images: images,
+        });
+      } else {
+        this.setState(prevState => ({
+          images: [...prevState.images, ...images],
+        }));
+      }
       this.setState({
-        images: images,
         loadMoreVisible: myGallery.ShowLoadMore(),
       });
-
-      return true;
-    } catch {
-      this.setState({ error: 'No pictures were found for this search' });
-      return false;
-    } finally {
-      this.setState({ isLoading: false });
-    }
-  };
-
-  pushData = async () => {
-    try {
-      this.setState({ isLoading: true, erorr: null, loadMoreVisible: false });
-      const images = (await myGallery.getPhotos()).data.hits;
-      const makeImages = images.map(image => {
-        const { id, webformatURL, largeImageURL, tags } = image;
-        return {
-          id,
-          webformatURL,
-          largeImageURL,
-          tags,
-        };
-      });
-      this.setState(prevState => ({
-        images: [...prevState.images, ...makeImages],
-      }));
-
       return true;
     } catch {
       this.setState({ error: 'No pictures were found for this search' });
@@ -86,10 +71,10 @@ export class App extends Component {
 
   componentDidUpdate(_, prevState) {
     if (prevState.page !== this.state.page && this.state.page !== 1) {
-      this.pushData();
+      this.getData(false);
     }
     if (prevState.searchWord !== this.state.searchWord) {
-      this.getData(this.searchWord);
+      this.getData(true);
     }
   }
 
